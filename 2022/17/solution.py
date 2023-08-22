@@ -3,7 +3,7 @@ import numpy as np
 import random
 from itertools import combinations
 
-file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\17\input.txt", "r")
+file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\2022\17\input.txt", "r")
 movement = []
 for line in file.readlines():
     movement=line
@@ -79,7 +79,7 @@ def print_rocks():
                 print(".", end="")
         print()
     print("--------")
-    for y in range(10, 2, -1):
+    for y in range(10, 0, -1):
         for x in range(0, 7):
             if (x, y) in rocks:
                 print("#", end="")
@@ -99,13 +99,16 @@ def print_rocks():
 # print(movement_counter)
 # print(highest_rock)
 
+goal = 1000000000000
+# goal = 2022
+
 
 print(len(movement))
 print()
 prev_movement_shape_combinations = dict()
-while shape_counter<1000000000000:
+while shape_counter<goal:
     if cur_shape == None:
-        if ((movement_counter)%len(movement), (shape_counter)%len(shapes)) in prev_movement_shape_combinations.keys():
+        if ((movement_counter)%len(movement), (shape_counter)%len(shapes)) in prev_movement_shape_combinations.keys() and shape_counter>2000:
             print("repetitive")
             print((movement_counter)%len(movement), (shape_counter)%len(shapes))
             repetitive_from = prev_movement_shape_combinations[((movement_counter)%len(movement), (shape_counter)%len(shapes))]
@@ -131,9 +134,10 @@ rocks = set()
 cur_shape = None
 shape_counter = -1
 movement_counter = -1
+highest_rock=0
 
 
-while shape_counter<(1000000000000-repetitive_from[1])%(repetitive_to[1]-repetitive_from[1])+repetitive_from[1]:
+while shape_counter<((goal)%(repetitive_to[1]-repetitive_from[1])):
     if cur_shape == None:
         cur_shape = start_new_shape(get_next_shape())
     cur_shape=move_current_shape(cur_shape, get_next_movement())
@@ -142,10 +146,17 @@ highest_rock_repetitive = repetitive_to[2]-repetitive_from[2]
 
 
 
-print(highest_rock_repetitive*(int((1000000000000-repetitive_from[1])/(repetitive_to[1]-repetitive_from[1]))-1)+highest_rock)
+print(highest_rock_repetitive*(int((goal)/(repetitive_to[1]-repetitive_from[1])))+highest_rock)
 # print(len(rocks))
 # print(shape_counter)
 # print(movement_counter)
 # print(highest_rock)
 
 # print(highest_rock_repetitive*(int(1000000000000/len(movement))-1)+highest_rock)
+
+
+# WRONG
+# 1594236311216
+
+# CORRECT
+# 1595988538691

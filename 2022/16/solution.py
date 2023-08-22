@@ -3,7 +3,7 @@ import numpy as np
 import random
 from itertools import combinations
 
-file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\16\input.txt", "r")
+file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\2022\16\input.txt", "r")
 input = dict()
 for line in file.readlines():
     i=line.strip().split(" ")
@@ -116,7 +116,6 @@ valves = [i for i in distances.keys() if i != "AA"]
 combins = list(combinations(valves, 1)) + list(combinations(valves, 2)) + list(combinations(valves, 3)) + list(combinations(valves, 4)) + list(combinations(valves, 5)) + list(combinations(valves, 6))+ list(combinations(valves, 7))
 
 print(len(combins))
-breakpoint()
 for i in combins:
     first_half=list(i)
     second_half = [i for i in distances.keys() if i not in first_half]
