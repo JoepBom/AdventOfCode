@@ -1,5 +1,5 @@
 from pprint import pprint
-file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\15\input.txt", "r")
+file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\2022\15\input.txt", "r")
 input = []
 sensors = []
 closest_beacons = []
