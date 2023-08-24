@@ -3,7 +3,7 @@ import numpy as np
 import random
 from itertools import combinations
 
-file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\2022\19\input.txt", "r")
+file = open(r"C:\Users\JoepBom\Documents\AdventOfCode\2022\20\input.txt", "r")
 input = list((i, int(line)*811589153) for i, line in enumerate(file.readlines()))
 pprint(input)
 
