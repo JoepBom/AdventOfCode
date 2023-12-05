@@ -9,45 +9,51 @@ os.environ["AOC_SESSION"]="53616c7465645f5f38e9d0d82d146a56ab1d6712424f5e2e00846
 puzzle = Puzzle(year,day)
 input = puzzle.input_data.split("\n\n")
 
-Seeds = [int(i) for i in input[0].split(" ")[1:]]
+seeds = [int(i) for i in input[0].split(" ")[1:]]
 maps = [input[i].split("\n")[1:] for i in range(1, len(input))]
-maps = [[[int(i) for i in line.split()] for line in map] for map in maps]
+maps = [[tuple(int(i) for i in line.split()) for line in map] for map in maps]
 solutions=[]
-for val in Seeds:
+
+for value in seeds:
     for map in maps:
-        for line in map:
-            if val>=line[1] and val-line[1]<line[2]:
-                val=line[0]+val-line[1]
+        for (dst, src, rng) in map:
+            if value>=src and value-src<rng:
+                value=dst+value-src
                 break
-    solutions.append(val)
+    solutions.append(value)
 
 submit(min(solutions), part=1, year=year, day=day)
 
-val_ranges = Seeds
+value_ranges = seeds
 for map in maps:
-    new_val_ranges = []
-    while len(val_ranges)>0:
+    new_value_ranges = []
+    while len(value_ranges)>0:
+        # Until there are no more ranges to map
+        # Map ranges to new ranges        
         changed=False
-        for line in map:
-            x, x_range=val_ranges[0:2]
-            if max(line[1],x)<min(x+x_range, line[1]+line[2]):
-                # Found an overlap, get new ranges in new and old list
-                val_ranges.pop(0)
-                val_ranges.pop(0)
-                if x<line[1]:
-                    val_ranges.append(x)
-                    val_ranges.append(line[1]-x)
-                if x+x_range>line[1]+line[2]:
-                    val_ranges.append(line[1]+line[2])
-                    val_ranges.append(x+x_range-line[1]-line[2])
-                new_val_ranges.append(line[0]-line[1]+max(line[1],x))
-                new_val_ranges.append(min(x+x_range, line[1]+line[2])-max(line[1],x))
+        for (dst, src, rng) in map:
+            x, x_range=value_ranges[0:2]
+            if max(src,x)<min(x+x_range, src+rng):
+                # Found an overlap between the range and the map
+                value_ranges.pop(0)
+                value_ranges.pop(0)
+                if x<src:
+                    # If the range starts before the map, the first part of the range still needs to be mapped
+                    value_ranges.append(x)
+                    value_ranges.append(src-x)
+                if x+x_range>src+rng:
+                    # If the range ends after the map, the last part of the range still needs to be mapped
+                    value_ranges.append(src+rng)
+                    value_ranges.append(x+x_range-src-rng)
+                # The part of the range that overlaps with the map is mapped to the new range
+                new_value_ranges.append(dst-src+max(src,x))
+                new_value_ranges.append(min(x+x_range, src+rng)-max(src,x))
                 changed=True
                 break
         if not changed:
-            # No overlaps found, append old range to new list
-            new_val_ranges.append(val_ranges.pop(0))
-            new_val_ranges.append(val_ranges.pop(0))
-    val_ranges=new_val_ranges
+            # No overlaps found between the range and the map, so we keep the range as is
+            new_value_ranges.append(value_ranges.pop(0))
+            new_value_ranges.append(value_ranges.pop(0))
+    value_ranges=new_value_ranges
 
-submit(min([val_ranges[i] for i in range(0,len(val_ranges),2)]), part=2, year=year, day=day)
+submit(min([value_ranges[i] for i in range(0,len(value_ranges),2)]), part=2, year=year, day=day)
