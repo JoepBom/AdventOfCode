@@ -25,8 +25,8 @@ for time, distance in zip(times, distances):
 submit(sol1, part = 1, year=year, day=day)
 
 # concatenate all numbers from input[0] and input[1] into one string
-time = int(input[0].replace(" ","")[5:])
-distance = int(input[1].replace(" ","")[9:])
+time = int(input[0].split(":")[1].replace(" ",""))
+distance = int(input[1].split(":")[1].replace(" ",""))
 
 lower_bound = int((time - math.sqrt(time**2-4.*distance))/2)
 upper_bound = int((time + math.sqrt(time**2-4.*distance))/2)
