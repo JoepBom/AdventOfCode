@@ -1,3 +1,4 @@
+from typing import Dict, Tuple
 from aocd.models import Puzzle
 from aocd import submit
 import os
@@ -7,14 +8,12 @@ from pprint import pprint
 year=2023
 day=19
 part="a"
-os.environ["AOC_SESSION"]="53616c7465645f5f38e9d0d82d146a56ab1d6712424f5e2e00846cd3f9a466e8a5599b36da85eb3c2c69a985a5774afe86260b5c528d679eeee49c1433aa183d"
 
 puzzle = Puzzle(year,day)
 input = puzzle.input_data
 workflows = input.split("\n\n")[0].splitlines()
 input =input.split("\n\n")[1].splitlines()
 pprint(workflows)
-
 
 class Job:
     tests: list
@@ -77,53 +76,65 @@ for line in input:
     if eval_input(val_dict):
         sol1+=sum(val_dict.values())
 
-print(sol1)
+# print(sol1)
 
 
 
-submit(sol1, part=part, day=day, year=year)
+# submit(sol1, part=part, day=day, year=year)
 
 part="b"
 
 
-interesting_values = {"x": {0, 4000}, "m": {0, 4000}, "a": {0, 4000}, "s": {0, 4000}}
+ranges = {"x": (1, 4001), "m": (1, 4001), "a": (1, 4001), "s": (1, 4001)}
 
-for job_id, job in job_dict.items():
-    for test in job.tests[:-1]:
-        interesting_values[test[0]].add(int(test[2:]))
-        if test[1]=="<":
-            interesting_values[test[0]].add(int(test[2:])-1)
+def get_range_combinations(range_dict: Dict[str, Tuple[int]]):
+    lengths = [range_dict[key][1]-range_dict[key][0] for key in range_dict]
+    return lengths[0]*lengths[1]*lengths[2]*lengths[3]
+
+def evaluate_range(range_dict: Dict[str, Tuple[int]], job_dict: Dict[str, Job], job_id: str, test_nr: int):
+    test = job_dict[job_id].tests[test_nr]
+    next_step = job_dict[job_id].next_steps[test_nr]
+    if len(test)==0:
+        if next_step == "A":
+            return get_range_combinations(range_dict)
+        if next_step == "R":
+            return 0
+        return evaluate_range(range_dict, job_dict, next_step, 0)
+    var= test[0]
+    amount = int(test[2:])
+    correct_range_dict = None
+    false_range_dict = None
+    if test[1]==">":
+        if amount in range(range_dict[var][0], range_dict[var][1]-1):
+            correct_range_dict = range_dict.copy()
+            correct_range_dict[var] = (amount+1, range_dict[var][1])
+            false_range_dict = range_dict.copy()
+            false_range_dict[var] = (range_dict[var][0], amount+1)
+        elif amount < range_dict[var][0]:
+            correct_range_dict = range_dict.copy()
         else:
-            interesting_values[test[0]].add(int(test[2:])+1)
+            false_range_dict = range_dict.copy()
+    elif test[1]=="<":
+        if amount in range(range_dict[var][0]+1, range_dict[var][1]):
+            correct_range_dict = range_dict.copy()
+            correct_range_dict[var] = (range_dict[var][0], amount)
+            false_range_dict = range_dict.copy()
+            false_range_dict[var] = (amount, range_dict[var][1])
+        elif amount > range_dict[var][1]:
+            correct_range_dict = range_dict.copy()
+        else:
+            false_range_dict = range_dict.copy()
+    res = 0
+    if correct_range_dict is not None:
+        if next_step == "A":
+            res += get_range_combinations(correct_range_dict)
+        elif next_step != "R":
+            res += evaluate_range(correct_range_dict, job_dict, next_step, 0)
+    if false_range_dict is not None:
+        res += evaluate_range(false_range_dict, job_dict, job_id, test_nr+1)
+    return res
 
-interesting_values={key: sorted(val) for key,val in interesting_values.items()}
-# pprint(interesting_values)
-sol2=0
-for xi, x in enumerate(interesting_values["x"][1:]):
-    try:
-        if eval_input({"x": x}):
-            sol2+=(x-interesting_values["x"][xi])*4000**3
-        continue
-    except:
-         None
-    for mi, m in enumerate(interesting_values["m"][1:]):
-        try:
-            if eval_input({"x": x, "m": m}):
-                sol2+=(x-interesting_values["x"][xi])*(m-interesting_values["m"][mi])*4000**2
-            continue
-        except:
-            None
-        for ai, a in enumerate(interesting_values["a"][1:]):
-            try:
-                if eval_input({"x": x, "m": m, "a":a}):
-                    sol2+=(x-interesting_values["x"][xi])*(m-interesting_values["m"][mi])*(a-interesting_values["a"][ai])*4000
-                continue
-            except:
-                None  
-            for si, s in enumerate(interesting_values["s"][1:]):
-                if eval_input({"x": x, "m": m, "a":a, "s":s}):
-                    sol2+= (x-interesting_values["x"][xi])*(m-interesting_values["m"][mi])*(a-interesting_values["a"][ai])*(s-interesting_values["s"][si])
-
+sol2 = evaluate_range(ranges, job_dict, "in", 0)
 print(sol2)
 
 submit(sol2, part=part, day=day, year=year)
